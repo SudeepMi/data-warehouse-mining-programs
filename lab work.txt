@@ -1,0 +1,355 @@
+#1.1 Implementation of Standard scaler (normalize data with standard scaler)
+import numpy as np
+import pandas as pd
+class StandardNorm:
+  def scale(self,d):
+    for i in d.columns:
+      mean=d[i].mean()
+      sd=d[i].std()      
+      d[i]=(d[i]-mean)/sd     
+    return d
+data=pd.DataFrame([[45000,42],[32000,26],[58000,48],[37000,32]],columns=['Salary','Age'])
+print("Original Data")
+print(data)
+s=StandardNorm()
+df=s.scale(data)
+print("\nScaled Data")
+print(df)
+
+
+#1.2 Implementation of min-max scaler 
+import pandas as pd
+class MinMaxNorm:
+  def scale(self,d):
+    for i in d.columns:
+      min=d[i].min()
+      max=d[i].max()
+      d[i]=(d[i]-min)/(max-min)
+    return d
+data=pd.DataFrame([[45000,42],[32000,26],[58000,48],[37000,32]],columns=['Salary','Age'])
+print("Original Data")
+print(data)
+s=MinMaxNorm()
+print("\nScaled Data")
+df=s.scale(data)
+print(df)
+
+
+#Lab 2.1 : Data Cleaning
+import pandas as pd
+import numpy as np
+
+data = pd.read_csv('D:/python_projects/employees.csv')
+print("Original Data")
+print(data[0:25])
+
+# Removing missing values
+data=data.dropna(axis=0)
+
+# Removing duplicate rows
+data.drop_duplicates(keep='first',inplace=True)
+
+# Removing column Boonus %
+del data['Bonus %']
+
+# Correcting Inconsitencies among values
+data['Team']=data['Team'].str.replace('Fin','Finance')
+data['Team']=data['Team'].str.replace('Mkt','Marketing')
+data['Team']=data['Team'].str.replace('Financeance','Finance')
+
+print("Cleaned Data")
+print(data[0:25])
+data.to_csv('D:/python_projects/employees_cleaned.csv', index=False)
+print("Successfully Cleaned...")
+
+
+
+#Lab 2.2 : Data Cleaning
+import pandas as pd
+import numpy as np
+
+data = pd.read_csv('D:/python_projects/employees.csv')
+print("Original Data")
+print(data[0:25])
+# Filling missing values with mean 
+data['Salary']=data['Salary'].fillna(data['Salary'].mean())
+print("Cleaned Data")
+print(data[0:25])
+
+data = pd.read_csv('D:/python_projects/employees.csv')
+print("Original Data")
+print(data[0:25])
+# Filling missing values withi
+data['Salary']=data['Salary'].interpolate(method="linear")
+print("Cleaned Data")
+print(data[0:25])
+
+3. Transformation (DOB to AGE)
+
+import pandas as pd
+
+data=pd.read_csv('F:/DWDM/lab/python/student.csv')
+print("Original Data")
+print(data[0:5])
+
+data["DOB"] = pd.to_datetime(data["DOB"])
+today = pd.to_datetime("today").date()
+data["AGE"] = (today - data["DOB"].dt.date).dt.days / 365.25
+data["AGE"] = data["AGE"].astype(int)
+#data.to_csv("F:/DWDM/lab/python/data_with_age.csv", index=False)
+#data.to_csv("F:/DWDM/lab/python/student.csv", index=True, mode="w")
+print("Transformed Data")
+#this will print with index
+#print(data[0:5])
+#print wiout index
+print(data.to_string(index=False))
+
+---------------------------------------another example-----------------------
+import pandas as pd 
+import numpy as np
+import matplotlib.pyplot as plt
+#New Variable
+from dateutil.relativedelta import *
+from datetime import *
+
+df = pd.read_csv("D:/python_projects/student-data.csv")  
+def get_age(dob):
+    now = datetime.now()
+    age = relativedelta(now, dob).years
+    return age
+  
+df['age'] = pd.to_datetime(df['dob']).apply(get_age)
+
+data = df.filter(['name','dob','age','is_student','target'])
+
+print(data)
+
+---------------
+4. Association-rule-mining
+
+# 4.1 Association-rule-mining-via-apriori-algorithm
+#Let's suppose that we want rules for only those items that are purchased at least 5 times a day, or 7 x 5 = 35 times in one week, since our dataset is for a one-week time period. The support for those items can be calculated as 35/7500 = 0.0045. The minimum confidence for the rules is 20% or 0.2. Similarly, we specify the value for lift as 3 and finally min_length is 2 since we want at least two products in our rules. These values are mostly just arbitrarily chosen, so you can play with these values and see what difference it makes in the rules you get back out.
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from apyori import apriori
+store_data = pd.read_csv('F:/DWDM/lab/labs/store_data.csv',header=None)
+store_data.head()
+records = []
+for i in range(0, 7501):
+    records.append([str(store_data.values[i,j]) for j in range(0, 20)])
+association_rules = apriori(records, min_support=0.0045, min_confidence=0.2, min_lift=3, min_length=2)
+association_results = list(association_rules)
+
+
+for item in association_results:
+
+    # first index of the inner list
+    # Contains base item and add item
+    pair = item[0] 
+    items = [x for x in pair]
+    print("Rule: " + items[0] + " -> " + items[1])
+
+    #second index of the inner list
+    print("Support: " + str(item[1]))
+
+    #third index of the list located at 0th
+    #of the third index of the inner list
+
+    print("Confidence: " + str(item[2][0][2]))
+    print("Lift: " + str(item[2][0][3]))
+    print("=====================================")
+
+---
+# 4.2 Sample code to do FP-Growth in Python
+import pyfpgrowth
+# Creating Sample Transactions
+transactions = [
+     ['Milk', 'Bread', 'Saffron'],
+     ['Milk', 'Saffron'],
+     ['Bread', 'Saffron','Wafer'],
+     ['Bread','Wafer'],
+ ]
+ 
+#Finding the frequent patterns with min support threshold=0.5
+FrequentPatterns=pyfpgrowth.find_frequent_patterns(transactions=transactions,support_threshold=0.5)
+print(FrequentPatterns)
+
+# Generating rules with min confidence threshold=0.5
+print("Generating rules with min confidence threshold=0.5")
+Rules=pyfpgrowth.generate_association_rules(patterns=FrequentPatterns,confidence_threshold=0.5)
+print(Rules)
+----------------------------------------------
+#5. Classifiaction: Diabetes Prediction Using Naive Bayes Classifier
+import pandas as pd
+from sklearn import metrics
+from sklearn.naive_bayes import GaussianNB
+
+dataset = pd.read_csv('F:/DWDM/lab/labs/Diabetes.csv')
+
+
+split = int(len(dataset)*0.7)
+train, test = dataset[:split], dataset[split:]
+
+p = train['Pragnency'].values
+g = train['Glucose'].values
+bp= train['Blod Pressure'].values
+st= train['Skin Thikness'].values
+ins= train['Insulin'].values
+bmi= train['BMI'].values
+dfp= train['DFP'].values
+a= train['Age'].values
+d= train['Diabetes'].values
+
+trainfeatures=zip(p,g,bp,st,ins,bmi,dfp,a)
+traininput=list(trainfeatures)
+#print(traininput)
+
+model = GaussianNB()
+model.fit(traininput,d)
+
+p = test['Pragnency'].values
+g = test['Glucose'].values
+bp= test['Blod Pressure'].values
+st= test['Skin Thikness'].values
+ins= test['Insulin'].values
+bmi= test['BMI'].values
+dpf= test['DFP'].values
+a= test['Age'].values
+d= test['Diabetes'].values
+
+testfeatures=zip(p,g,bp,st,ins,bmi,dpf,a)
+testinput=list(testfeatures)
+
+predicted= model.predict(testinput) 
+print("Actual Class:   ", *d)
+print("Predicted Class:", *predicted)
+
+print("Confusion Matrix")
+print(metrics.confusion_matrix(d, predicted))
+print("********Classifiaction Measures*********")
+print("Accuracy:",metrics.accuracy_score(d,predicted))
+print("Recall:",metrics.recall_score(d,predicted))
+print("Precision:",metrics.precision_score(d,predicted))
+print("F1-Score:",metrics.f1_score(d,predicted))
+-------------------------------------
+
+#Lab 6.1 K-means Clustering
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
+data=100*np.random.rand(100,2)
+print(*data)
+km=KMeans(n_clusters=3,init='random')
+km.fit(data)
+centers = km.cluster_centers_
+labels = km.labels_
+print("Cluster Centers:",*centers)
+print("Cluster Labels:",*labels)
+
+colors = ["r","g","b"]
+markers=["+","x","*"]
+for i in range(len(data)):
+    plt.plot(data[i][0], data[i][1], color=colors[labels[i]], marker=markers[labels[i]])
+plt.scatter(centers[:, 0],centers[:, 1], marker = "o", s=50, linewidths = 5)
+plt.show()
+
+#6.2 Mini-Batch K-means Clustering
+import time
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt
+from sklearn.cluster import MiniBatchKMeans
+
+data=100*np.random.rand(100,2)
+print(*data)
+mbk=MiniBatchKMeans(n_clusters=5,init='random', batch_size=3000)
+t0= time.time()
+mbk.fit(data)
+t1= time.time()
+tt=t1-t0
+print("Total Time:",tt)
+cents = mbk.cluster_centers_
+labels = mbk.labels_
+print("Cluster Centers:",*cents)
+print("Labels:",*labels)
+
+colors = ["g","r","b",'y','m']
+markers=["+","x","*",'.','d']
+for i in range(len(data)):
+    plt.plot(data[i][0], data[i][1], color=colors[labels[i]], marker=markers[labels[i]])
+plt.scatter(cents[:, 0],cents[:, 1], marker = "o", s=50, linewidths = 5)
+plt.show()
+
+#6.3 Hierarchical Clustering (Agglomerative Clustering)
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+x = [4, 5, 10, 4, 3, 11, 14 , 6, 10, 12]
+y = [21, 19, 24, 17, 16, 25, 24, 22, 21, 21]
+
+data = list(zip(x, y))
+
+linkage_data = linkage(data, method='ward', metric='euclidean')
+dendrogram(linkage_data)
+
+plt.show()
+
+#Agglomerative Clustering
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import AgglomerativeClustering
+
+x = [4, 5, 10, 4, 3, 11, 14 , 6, 10, 12]
+y = [21, 19, 24, 17, 16, 25, 24, 22, 21, 21]
+
+data = list(zip(x, y))
+
+hierarchical_cluster = AgglomerativeClustering(n_clusters=2, affinity='euclidean', linkage='ward')
+labels = hierarchical_cluster.fit_predict(data)
+print(labels)
+
+plt.scatter(x, y, c=labels)
+plt.show()
+
+#6.4 Clustering Iris data using KMedoids
+from sklearn.datasets import load_iris
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn_extra.cluster import KMedoids
+from sklearn.preprocessing import StandardScaler
+from sklearn import metrics
+
+iris_data=load_iris()
+x=iris_data.data
+y=iris_data.target
+print(*x)
+print("Actual Group:",*y)
+
+sc=StandardScaler()
+sc.fit(x)
+sx=sc.transform(x)
+km=KMedoids(n_clusters=3)
+km.fit(sx)
+py=km.fit_predict(sx)
+print("Predicted Group",*py)
+
+fig = plt.figure(figsize = (12, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+colors = ["g","r","b"]
+markers=["+","x","*"]
+for i in range(len(sx)):
+  ax.scatter(sx[i][0], sx[i][1], sx[i][2],color=colors[py[i]], marker=markers[py[i]])
+plt.show()
+
+hs=metrics.homogeneity_score(y, py)  #Homoginity Score
+print("Homogeniety Score:",hs)
+sc=metrics.silhouette_score(sx, py, metric='euclidean') #Silhouette Coefficient
+print("Silhouette Coefficient:",sc)
+
